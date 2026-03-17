@@ -11,118 +11,137 @@
             --accent: #8c7b65;
         }
 
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Georgia', serif; background: #d1c7b7; color: var(--ink); }
+        body, html { 
+            margin: 0; padding: 0; height: 100%; width: 100%;
+            font-family: 'Georgia', serif; background: #d1c7b7; color: var(--ink);
+            overflow-x: hidden;
+        }
 
-        /* Main Site Content */
-        .page-content { max-width: 850px; margin: 40px auto; background: var(--paper); padding: 50px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); line-height: 1.6; }
-        h1 { border-bottom: 2px solid var(--accent); padding-bottom: 15px; }
-        .darwin-portrait { width: 220px; float: right; margin: 0 0 20px 20px; border: 8px solid #fff; outline: 1px solid #ccc; }
+        /* Main Darwin Site */
+        .page-content { 
+            max-width: 800px; margin: 40px auto; background: var(--paper); 
+            padding: 50px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); 
+            position: relative; z-index: 1;
+        }
+
+        h1 { border-bottom: 2px solid var(--accent); padding-bottom: 10px; font-variant: small-caps; }
         
-        /* The Secret Trigger */
-        #secret-signature { cursor: pointer; display: inline-block; margin-top: 50px; font-style: italic; color: #555; user-select: none; }
+        .portrait { 
+            width: 200px; float: right; margin: 0 0 20px 20px; 
+            border: 10px solid #fff; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); 
+        }
 
-        /* The Secret Overlay (Library) */
+        /* Hidden Trigger */
+        #secret-trigger { 
+            margin-top: 60px; cursor: pointer; display: inline-block; 
+            color: var(--accent); font-style: italic; user-select: none;
+        }
+
+        /* Secret Library Menu */
         #library-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: none; z-index: 100;
+            background: rgba(17, 17, 17, 0.98); display: none; z-index: 100;
             flex-direction: column; align-items: center; justify-content: center;
         }
 
-        .game-grid { display: flex; gap: 30px; }
-        .game-btn { 
-            background: #222; border: 1px solid #444; color: #00ffcc; 
-            padding: 30px; border-radius: 12px; cursor: pointer; text-align: center;
-            transition: 0.3s; width: 200px;
+        .game-card {
+            background: #222; border: 1px solid #444; color: #eee;
+            padding: 25px; margin: 10px; width: 250px; text-align: center;
+            border-radius: 8px; cursor: pointer; transition: 0.2s;
         }
-        .game-btn:hover { border-color: #00ffcc; transform: scale(1.05); }
+        .game-card:hover { border-color: #00ffcc; background: #2a2a2a; }
 
-        /* THE IN-SITE GAMING WINDOW */
-        #game-window-container {
+        /* THE GAME WINDOW (IFRAME) */
+        #game-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; display: none; z-index: 200;
         }
-        iframe { width: 100%; height: calc(100% - 40px); border: none; }
-        .window-bar { 
-            height: 40px; background: #1a1a1a; display: flex; 
-            justify-content: space-between; align-items: center; padding: 0 15px;
-            color: white; font-family: sans-serif; font-size: 14px;
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* Quick Notification */
+        #hint {
+            position: fixed; bottom: 10px; right: 10px; font-size: 10px; color: rgba(0,0,0,0.2);
         }
-        .close-btn { cursor: pointer; color: #ff4444; font-weight: bold; border: 1px solid #ff4444; padding: 2px 10px; border-radius: 4px; }
     </style>
 </head>
 <body>
 
     <div class="page-content">
-        <h1>The Darwin Papers</h1>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Charles_Darwin_seated_crop.jpg" class="darwin-portrait">
-        <p>Charles Robert Darwin FRS FRGS FLS FZS was an English naturalist whose scientific theory of evolution by natural selection became the foundation of modern evolutionary studies.</p>
-        <p>His journey on the HMS Beagle allowed him to observe various geological formations and fossils, leading to his monumental work, <i>On the Origin of Species</i> (1859).</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Charles_Darwin_seated_crop.jpg" class="portrait">
+        <h1>The Darwin Digital Archive</h1>
+        <p>Welcome to the digital repository of Charles Darwin's scientific manuscripts. This archive contains primary sources regarding the 1831-1836 voyage of the HMS Beagle.</p>
         
-        <h3>Related Studies</h3>
+        <h3>Field Notes & Correspondence</h3>
+        <p>Darwin's notes on the Galapagos finches provided the empirical evidence required to support the theory of natural selection. His work shifted the paradigm of biological sciences permanently.</p>
+        
         <ul>
-            <li>Natural Selection in the Galapagos</li>
-            <li>The Descent of Man (1871)</li>
-            <li>Botanical Observations of Climbing Plants</li>
+            <li>Geological Observations (1844)</li>
+            <li>Monograph on Cirripedia (1851)</li>
+            <li>The Power of Movement in Plants (1880)</li>
         </ul>
 
-        <div id="secret-signature" onclick="checkSecret(this)">— Charles Robert Darwin</div>
+        <div id="secret-trigger" onclick="checkUnlock()">— Charles Robert Darwin</div>
     </div>
+
+    <div id="hint">Archive v2.4.1</div>
 
     <div id="library-overlay">
-        <h2 style="color: white; margin-bottom: 40px;">System Archives</h2>
-        <div class="game-grid">
-            <div class="game-btn" onclick="openGame('astra.html')">
+        <h2 style="color: white; font-family: sans-serif;">SYSTEM_ROOT / ARCHIVE / GAMES</h2>
+        <div style="display: flex;">
+            <div class="game-card" onclick="launch('astra.html')">
                 <h3>Astra</h3>
-                <p>Launch Instance</p>
+                <p style="font-size: 12px; color: #888;">(Eaglercraft 1.8)</p>
             </div>
-            <div class="game-btn" onclick="openGame('Hollow Knight.html')">
+            <div class="game-card" onclick="launch('Hollow Knight.html')">
                 <h3>Hollow Knight</h3>
-                <p>Launch Instance</p>
+                <p style="font-size: 12px; color: #888;">(Unity WebGL)</p>
             </div>
         </div>
-        <p onclick="toggleLibrary(false)" style="color: #666; margin-top: 40px; cursor: pointer;">Exit Archive</p>
+        <p style="color: #555; margin-top: 30px;">Press ESC to go back</p>
     </div>
 
-    <div id="game-window-container">
-        <div class="window-bar">
-            <span id="game-title">Gaming Window</span>
-            <span class="close-btn" onclick="closeGame()">CLOSE [X]</span>
-        </div>
+    <div id="game-container">
         <iframe id="game-frame" src=""></iframe>
     </div>
 
     <script>
         let clicks = 0;
+        const library = document.getElementById('library-overlay');
+        const container = document.getElementById('game-container');
+        const frame = document.getElementById('game-frame');
 
-        function checkSecret() {
+        // Secret Entrance Logic
+        function checkUnlock() {
             clicks++;
             if (clicks >= 3) {
-                toggleLibrary(true);
+                library.style.display = 'flex';
                 clicks = 0;
             }
         }
 
-        function toggleLibrary(show) {
-            document.getElementById('library-overlay').style.display = show ? 'flex' : 'none';
-        }
-
-        function openGame(file) {
-            const container = document.getElementById('game-window-container');
-            const frame = document.getElementById('game-frame');
-            const title = document.getElementById('game-title');
-            
-            title.innerText = "Running: " + file;
-            frame.src = file;
+        // Launch Game inside the Window
+        function launch(file) {
+            library.style.display = 'none';
             container.style.display = 'block';
-            toggleLibrary(false); // Hide the library selection
+            frame.src = file; // Loads the local file
+            frame.focus();
         }
 
-        function closeGame() {
-            const container = document.getElementById('game-window-container');
-            const frame = document.getElementById('game-frame');
-            
-            frame.src = ""; // Stop the game process
+        // EMERGENCY ESCAPE: Press "Tab" to go back to Darwin
+        window.addEventListener('keydown', function(e) {
+            if (e.key === "Tab") {
+                e.preventDefault(); // Stop the default tab behavior
+                closeAll();
+            }
+            if (e.key === "Escape") {
+                closeAll();
+            }
+        });
+
+        function closeAll() {
             container.style.display = 'none';
+            library.style.display = 'none';
+            frame.src = ""; // Stops the game and audio immediately
         }
     </script>
 </body>
