@@ -2,159 +2,132 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>The Charles Darwin Digital Library - University Archive</title>
+    <title>Cambridge Digital Archives: Charles Darwin Collection</title>
     <style>
-        :root {
-            --bg: #f4f1ea;
-            --text: #2b2b2b;
-            --border: #d1cdc0;
-            --sidebar: #e8e4d8;
-        }
+        :root { --bg: #fdf6e3; --text: #2c241a; --border: #d1cdc0; --sidebar: #eee8d5; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Georgia', serif; background: var(--bg); overflow: hidden; color: var(--text); }
 
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Georgia', serif; background: var(--bg); overflow: hidden; }
+        /* HEADER & NAVIGATION */
+        header { background: #073642; color: #93a1a1; padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #002b36; font-size: 13px; }
+        .nav-link { cursor: pointer; color: #268bd2; font-weight: bold; text-decoration: none; }
 
-        /* HEADER */
-        header { 
-            background: #3e3a32; color: white; padding: 15px 30px; 
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 4px solid #2a2721;
-        }
-        .about-btn { cursor: pointer; font-weight: bold; text-decoration: none; color: #dcd0b8; font-size: 14px; }
+        .wrapper { display: flex; height: calc(100% - 40px); }
+        nav { width: 220px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 20px; font-size: 14px; }
+        nav h3 { font-size: 11px; text-transform: uppercase; color: #657b83; margin-bottom: 10px; border-bottom: 1px solid #ccc; }
+        nav ul { list-style: none; padding: 0; margin-bottom: 20px; }
+        nav li { padding: 6px 0; cursor: pointer; color: #586e75; }
+        nav li:hover { color: #268bd2; }
 
-        /* MAIN LAYOUT */
-        .wrapper { display: flex; height: calc(100% - 60px); }
-        
-        /* SIDEBAR NAVIGATION */
-        nav { width: 250px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 20px; }
-        nav h3 { font-size: 12px; text-transform: uppercase; color: #777; letter-spacing: 1px; }
-        nav ul { list-style: none; padding: 0; margin-bottom: 25px; }
-        nav li { padding: 8px 0; border-bottom: 1px solid #dcd8cc; font-size: 13px; cursor: pointer; color: #444; }
-        nav li:hover { color: #000; text-decoration: underline; }
+        /* CONTENT */
+        main { flex: 1; padding: 40px 60px; overflow-y: auto; position: relative; }
+        .article { max-width: 800px; line-height: 1.7; }
+        h1 { font-family: 'Times New Roman', serif; font-size: 32px; color: #073642; margin-bottom: 10px; }
+        .signature-area { margin-top: 50px; border-top: 1px solid #eee; padding-top: 20px; }
+        #sig { cursor: pointer; font-style: italic; opacity: 0.6; user-select: none; }
 
-        /* CONTENT AREA */
-        main { flex: 1; padding: 40px; overflow-y: auto; position: relative; background: var(--bg); }
-        .article { max-width: 750px; line-height: 1.8; color: var(--text); }
-        h1 { font-family: 'Times New Roman', serif; font-size: 28px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
-
-        /* SECRET SIGNATURE */
-        .sig-container { margin-top: 60px; padding-top: 20px; border-top: 1px double #ccc; }
-        #secret-sig { cursor: pointer; font-style: italic; color: #8c7b65; user-select: none; transition: opacity 0.3s; }
-        #secret-sig:hover { opacity: 0.8; }
-
-        /* HIDDEN OVERLAY (THE HUB) */
-        #vault-overlay {
+        /* HIDDEN STAFF LOGIN (The Hub) */
+        #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 5000; 
-            display: none; flex-direction: column; align-items: center; justify-content: center;
+            background: #002b36; z-index: 5000; display: none;
+            flex-direction: column; align-items: center; justify-content: center; color: #859900; font-family: monospace;
         }
-        .v-btn { 
-            background: #222; color: #555; border: 1px solid #333; 
-            padding: 20px; margin: 10px; width: 200px; text-align: center;
-            cursor: pointer; font-family: monospace; border-radius: 4px;
-        }
-        .v-btn:hover { color: #fff; border-color: #666; }
+        .vault-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .vault-item { background: #073642; border: 1px solid #586e75; padding: 12px; width: 220px; cursor: pointer; text-align: left; }
+        .vault-item:hover { background: #586e75; color: #eee8d5; }
 
-        /* GAME FRAME */
-        #game-window {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 6000; display: none;
-        }
+        /* GAME WINDOW */
+        #game-box { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 6000; display: none; }
         iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="about-btn" onclick="showSection('home')">UNIVERSITY ARCHIVE / BIOGRAPHY: DARWIN, C.</div>
-        <div style="font-size: 12px; opacity: 0.6;">Access Level: Public / Guest</div>
+        <div>SYSTEM: ONLINE | <span class="nav-link" onclick="showArticle('home')">ARCHIVE_ROOT</span></div>
+        <div>Cambridge Repository v8.1 (Guest Access)</div>
     </header>
 
     <div class="wrapper">
         <nav>
             <h3>Volumes</h3>
             <ul>
-                <li onclick="showSection('home')">Introduction</li>
-                <li onclick="showSection('early')">Early Education</li>
-                <li onclick="showSection('beagle')">The Beagle Voyage</li>
-            </ul>
-            <h3>Manuscripts</h3>
-            <ul>
-                <li onclick="showSection('origin')">Origin of Species</li>
-                <li onclick="showSection('descent')">The Descent of Man</li>
+                <li onclick="showArticle('home')">Introduction</li>
+                <li onclick="showArticle('voyage')">HMS Beagle Voyage</li>
+                <li onclick="showArticle('selection')">Natural Selection</li>
             </ul>
         </nav>
 
-        <main>
-            <div id="content-body" class="article">
-                </div>
-            
-            <div class="sig-container">
-                <span id="secret-sig" onclick="handleSigClick()">— Charles Robert Darwin</span>
+        <main id="main-ui">
+            <div id="text-content" class="article"></div>
+            <div class="signature-area">
+                <span id="sig" onclick="triggerSecret()">— Charles Robert Darwin</span>
             </div>
         </main>
     </div>
 
-    <div id="vault-overlay">
-        <div class="v-btn" onclick="launch('astra.html')">INIT_ASTRA</div>
-        <div class="v-btn" onclick="launch('Hollow Knight.html')">INIT_HOLLOW</div>
-        <div style="color: #333; margin-top: 20px; cursor:pointer;" onclick="closeVault()">[ CANCEL ]</div>
+    <div id="login-overlay">
+        <h2>CENTRAL_DATA_REPOSITORY</h2>
+        <p>[SECURE_ACCESS_GRANTED]</p>
+        <div class="vault-grid">
+            <div class="vault-item" onclick="launch('astra.html')">> RUN astra.sys</div>
+            <div class="vault-item" onclick="launch('Hollow Knight.html')">> RUN hollow_knight.sys</div>
+            <div class="vault-item" onclick="launch('cl99nightsitf.html')">> RUN 99_nights.sys</div>
+            <div class="vault-item" onclick="launch('clbadicecream2.html')">> RUN ice_cream_v2.sys</div>
+            <div class="vault-item" onclick="launch('clbadicecream3.html')">> RUN ice_cream_v3.sys</div>
+            <div class="vault-item" onclick="launch('clbadtimesimulator.html')">> RUN time_sim_alt.sys</div>
+        </div>
+        <p style="margin-top:30px; font-size:10px; color:#586e75; cursor:pointer;" onclick="closeHub()">[ DISCONNECT_SESSION ]</p>
     </div>
 
-    <div id="game-window">
+    <div id="game-box">
         <iframe id="game-frame" src=""></iframe>
     </div>
 
     <script>
-        const content = document.getElementById('content-body');
-        const vault = document.getElementById('vault-overlay');
-        const gameWin = document.getElementById('game-window');
+        const text = document.getElementById('text-content');
+        const login = document.getElementById('login-overlay');
+        const gameBox = document.getElementById('game-box');
         const frame = document.getElementById('game-frame');
-        
-        let sigClicks = 0;
+        let clicks = 0;
 
-        // Article Data
-        const articles = {
-            home: `<h1>Biographical Overview</h1><p>Charles Robert Darwin (12 February 1809 – 19 April 1882) was an English naturalist, geologist and biologist, best known for his contributions to evolutionary biology.</p><p>His journey on the HMS Beagle was the defining moment of his career, providing the data that would eventually lead to the theory of natural selection.</p>`,
-            early: `<h1>Early Education</h1><p>Darwin spent the summer of 1825 as an apprentice doctor, helping his father treat the poor of Shropshire. He then went to the University of Edinburgh Medical School, but found lectures dull and surgery distressing.</p>`,
-            beagle: `<h1>The Voyage of the Beagle</h1><p>The expedition lasted nearly five years. Darwin spent most of that time on land investigating geology and making natural history collections, while the Beagle surveyed and charted coasts.</p>`
+        const library = {
+            home: `<h1>The Darwin Collection</h1><p>Welcome to the digital repository. This archive contains the complete works and correspondence of Charles Darwin, curated by the University Library.</p>`,
+            voyage: `<h1>The HMS Beagle Voyage</h1><p>From 1831 to 1836, Darwin acted as a naturalist aboard the Beagle. His observations of biodiversity in the Galapagos remain foundational to modern biology.</p>`,
+            selection: `<h1>Theory of Natural Selection</h1><p>Darwin's theory posits that species evolve over generations through a process of natural selection, where favorable traits become more common.</p>`
         };
 
-        // Initialize first page
-        function showSection(id) {
-            closeVault();
-            gameWin.style.display = 'none';
-            frame.src = '';
-            content.innerHTML = articles[id] || articles['home'];
+        function showArticle(id) {
+            closeHub();
+            gameBox.style.display = 'none';
+            frame.src = "";
+            text.innerHTML = library[id] || library['home'];
         }
-        showSection('home');
 
-        // Secret Logic
-        function handleSigClick() {
-            sigClicks++;
-            if (sigClicks >= 3) {
-                vault.style.display = 'flex';
-                sigClicks = 0;
+        function triggerSecret() {
+            clicks++;
+            if (clicks >= 3) {
+                login.style.display = 'flex';
+                clicks = 0;
             }
         }
 
-        function closeVault() {
-            vault.style.display = 'none';
-        }
+        function closeHub() { login.style.display = 'none'; }
 
         function launch(file) {
-            vault.style.display = 'none';
-            gameWin.style.display = 'block';
+            login.style.display = 'none';
+            gameBox.style.display = 'block';
             frame.src = file;
             frame.focus();
         }
 
-        // RIGHT SHIFT CLOAK
+        // UNIVERSAL CLOAK: RIGHT SHIFT
         window.addEventListener('keydown', function(e) {
             if (e.code === "ShiftRight") {
-                // Instantly go back to a boring article and stop all game activity
-                showSection('early'); 
+                showArticle('home'); 
             }
         });
+
+        showArticle('home');
     </script>
 </body>
 </html>
