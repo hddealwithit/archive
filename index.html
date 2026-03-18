@@ -7,9 +7,8 @@
         :root { --bg: #fdf6e3; --text: #2c241a; --border: #d1cdc0; --sidebar: #eee8d5; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Georgia', serif; background: var(--bg); overflow: hidden; color: var(--text); }
 
-        /* HEADER & NAVIGATION */
         header { background: #073642; color: #93a1a1; padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #002b36; font-size: 13px; }
-        .nav-link { cursor: pointer; color: #268bd2; font-weight: bold; text-decoration: none; }
+        .nav-link { cursor: pointer; color: #268bd2; font-weight: bold; }
 
         .wrapper { display: flex; height: calc(100% - 40px); }
         nav { width: 220px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 20px; font-size: 14px; }
@@ -18,24 +17,21 @@
         nav li { padding: 6px 0; cursor: pointer; color: #586e75; }
         nav li:hover { color: #268bd2; }
 
-        /* CONTENT */
         main { flex: 1; padding: 40px 60px; overflow-y: auto; position: relative; }
         .article { max-width: 800px; line-height: 1.7; }
-        h1 { font-family: 'Times New Roman', serif; font-size: 32px; color: #073642; margin-bottom: 10px; }
+        h1 { font-family: 'Times New Roman', serif; font-size: 32px; color: #073642; }
         .signature-area { margin-top: 50px; border-top: 1px solid #eee; padding-top: 20px; }
         #sig { cursor: pointer; font-style: italic; opacity: 0.6; user-select: none; }
 
-        /* HIDDEN STAFF LOGIN (The Hub) */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #002b36; z-index: 5000; display: none;
             flex-direction: column; align-items: center; justify-content: center; color: #859900; font-family: monospace;
         }
         .vault-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .vault-item { background: #073642; border: 1px solid #586e75; padding: 12px; width: 220px; cursor: pointer; text-align: left; }
+        .vault-item { background: #073642; border: 1px solid #586e75; padding: 12px; width: 220px; cursor: pointer; }
         .vault-item:hover { background: #586e75; color: #eee8d5; }
 
-        /* GAME WINDOW */
         #game-box { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 6000; display: none; }
         iframe { width: 100%; height: 100%; border: none; }
     </style>
@@ -43,7 +39,7 @@
 <body>
 
     <header>
-        <div>SYSTEM: ONLINE | <span class="nav-link" onclick="showArticle('home')">ARCHIVE_ROOT</span></div>
+        <div>SYSTEM: ONLINE | <span class="nav-link" onclick="panic()">ARCHIVE_ROOT</span></div>
         <div>Cambridge Repository v8.1 (Guest Access)</div>
     </header>
 
@@ -56,8 +52,7 @@
                 <li onclick="showArticle('selection')">Natural Selection</li>
             </ul>
         </nav>
-
-        <main id="main-ui">
+        <main>
             <div id="text-content" class="article"></div>
             <div class="signature-area">
                 <span id="sig" onclick="triggerSecret()">— Charles Robert Darwin</span>
@@ -67,7 +62,6 @@
 
     <div id="login-overlay">
         <h2>CENTRAL_DATA_REPOSITORY</h2>
-        <p>[SECURE_ACCESS_GRANTED]</p>
         <div class="vault-grid">
             <div class="vault-item" onclick="launch('astra.html')">> RUN astra.sys</div>
             <div class="vault-item" onclick="launch('Hollow Knight.html')">> RUN hollow_knight.sys</div>
@@ -76,7 +70,7 @@
             <div class="vault-item" onclick="launch('clbadicecream3.html')">> RUN ice_cream_v3.sys</div>
             <div class="vault-item" onclick="launch('clbadtimesimulator.html')">> RUN time_sim_alt.sys</div>
         </div>
-        <p style="margin-top:30px; font-size:10px; color:#586e75; cursor:pointer;" onclick="closeHub()">[ DISCONNECT_SESSION ]</p>
+        <p style="margin-top:30px; font-size:10px; color:#586e75; cursor:pointer;" onclick="panic()">[ DISCONNECT ]</p>
     </div>
 
     <div id="game-box">
@@ -97,21 +91,14 @@
         };
 
         function showArticle(id) {
-            closeHub();
-            gameBox.style.display = 'none';
-            frame.src = "";
+            panic(); // Automatically hides games if navigating
             text.innerHTML = library[id] || library['home'];
         }
 
         function triggerSecret() {
             clicks++;
-            if (clicks >= 3) {
-                login.style.display = 'flex';
-                clicks = 0;
-            }
+            if (clicks >= 3) { login.style.display = 'flex'; clicks = 0; }
         }
-
-        function closeHub() { login.style.display = 'none'; }
 
         function launch(file) {
             login.style.display = 'none';
@@ -120,12 +107,32 @@
             frame.focus();
         }
 
-        // UNIVERSAL CLOAK: RIGHT SHIFT
+        // The Panic Function
+        function panic() {
+            gameBox.style.display = 'none';
+            login.style.display = 'none';
+            frame.src = ""; // Hard reset
+            text.innerHTML = library['home'];
+        }
+
+        // Listen for Right Shift on the main page
         window.addEventListener('keydown', function(e) {
-            if (e.code === "ShiftRight") {
-                showArticle('home'); 
-            }
+            if (e.code === "ShiftRight") panic();
         });
+
+        // SPECIAL FIX: Listen for Right Shift inside the Game Frame
+        frame.onload = function() {
+            try {
+                frame.contentWindow.addEventListener('keydown', function(e) {
+                    if (e.code === "ShiftRight") {
+                        // Call the panic function in the parent window
+                        window.panic();
+                    }
+                });
+            } catch (e) {
+                console.log("Cross-origin game detected. Cloak key might be limited.");
+            }
+        };
 
         showArticle('home');
     </script>
