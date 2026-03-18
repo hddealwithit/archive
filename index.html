@@ -4,7 +4,24 @@
     <meta charset="UTF-8">
     <title>Cambridge Digital Archives: Charles Darwin Collection</title>
     <style>
-        :root { --bg: #fdf6e3; --text: #2c241a; --border: #d1cdc0; --sidebar: #eee8d5; }
+        :root {
+            --bg: #fdf6e3;
+            --text: #2c241a;
+            --border: #d1cdc0;
+            --sidebar: #eee8d5;
+            --hub-bg: #0f172a;
+            --hub-panel: rgba(15, 23, 42, 0.9);
+            --hub-card: #ffffff;
+            --hub-card-alt: #f8fafc;
+            --hub-accent: #00a2ff;
+            --hub-accent-2: #7c3aed;
+            --hub-success: #22c55e;
+            --hub-text: #e5eefb;
+            --hub-muted: #9fb2d1;
+            --hub-shadow: 0 28px 80px rgba(2, 6, 23, 0.45);
+        }
+
+        * { box-sizing: border-box; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Georgia', serif; background: var(--bg); overflow: hidden; color: var(--text); }
 
         header { background: #073642; color: #93a1a1; padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #002b36; font-size: 13px; }
@@ -24,16 +41,343 @@
         #sig { cursor: pointer; font-style: italic; opacity: 0.6; user-select: none; }
 
         #login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #002b36; z-index: 5000; display: none;
-            flex-direction: column; align-items: center; justify-content: center; color: #859900; font-family: monospace;
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at top, rgba(0, 162, 255, 0.18), transparent 30%),
+                linear-gradient(160deg, #020617 0%, #0f172a 45%, #172554 100%);
+            z-index: 5000;
+            display: none;
+            color: var(--hub-text);
+            font-family: Inter, Arial, sans-serif;
+            overflow-y: auto;
         }
-        .vault-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .vault-item { background: #073642; border: 1px solid #586e75; padding: 12px; width: 220px; cursor: pointer; }
-        .vault-item:hover { background: #586e75; color: #eee8d5; }
 
-        #game-box { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 6000; display: none; }
+        .hub-shell {
+            min-height: 100%;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .hub-topbar,
+        .hub-hero,
+        .hub-main {
+            background: var(--hub-panel);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            box-shadow: var(--hub-shadow);
+        }
+
+        .hub-topbar {
+            border-radius: 24px;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .hub-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .hub-logo {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--hub-accent), #2563eb);
+            display: grid;
+            place-items: center;
+            box-shadow: 0 12px 32px rgba(0, 162, 255, 0.35);
+            transform: rotate(-10deg);
+            flex-shrink: 0;
+        }
+
+        .hub-logo::before {
+            content: "";
+            width: 21px;
+            height: 21px;
+            border: 6px solid white;
+            border-radius: 6px;
+            transform: rotate(25deg);
+        }
+
+        .hub-brand h2,
+        .hub-hero h3,
+        .hub-section-title,
+        .game-card h4,
+        .feature-card h4 { margin: 0; }
+
+        .hub-brand p,
+        .hub-hero p,
+        .hub-stats span,
+        .game-meta,
+        .hub-disclaimer,
+        .feature-card p { margin: 0; color: var(--hub-muted); }
+
+        .hub-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .pill.live { background: rgba(34, 197, 94, 0.12); color: #86efac; border: 1px solid rgba(134, 239, 172, 0.2); }
+        .pill.exit { background: rgba(148, 163, 184, 0.12); color: #dbeafe; border: 1px solid rgba(148, 163, 184, 0.18); cursor: pointer; }
+
+        .hub-hero {
+            border-radius: 32px;
+            padding: 28px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+            gap: 24px;
+            align-items: center;
+        }
+
+        .hub-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            background: rgba(124, 58, 237, 0.16);
+            color: #d8b4fe;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 8px 12px;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .hub-hero h3 { font-size: clamp(2rem, 4vw, 3.5rem); line-height: 0.95; }
+        .hub-hero p { font-size: 1rem; line-height: 1.7; max-width: 62ch; }
+
+        .hub-cta-row {
+            margin-top: 22px;
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .hub-button {
+            border: none;
+            border-radius: 16px;
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        }
+
+        .hub-button:hover { transform: translateY(-2px); }
+        .hub-button.primary { background: linear-gradient(135deg, var(--hub-accent), #2563eb); color: white; box-shadow: 0 18px 34px rgba(0, 162, 255, 0.28); }
+        .hub-button.secondary { background: rgba(148, 163, 184, 0.12); color: #e2e8f0; border: 1px solid rgba(148, 163, 184, 0.16); }
+
+        .hub-preview {
+            background: linear-gradient(160deg, rgba(255,255,255,0.92), rgba(224,231,255,0.85));
+            color: #0f172a;
+            border-radius: 28px;
+            padding: 24px;
+        }
+
+        .hub-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        .preview-tile {
+            border-radius: 20px;
+            padding: 16px;
+            min-height: 102px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-weight: 700;
+        }
+
+        .preview-tile.blue { background: linear-gradient(135deg, #0ea5e9, #2563eb); }
+        .preview-tile.green { background: linear-gradient(135deg, #34d399, #16a34a); }
+        .preview-tile.orange { background: linear-gradient(135deg, #fb923c, #f97316); }
+        .preview-tile.purple { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
+
+        .hub-main {
+            border-radius: 30px;
+            padding: 26px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.8fr);
+            gap: 24px;
+        }
+
+        .hub-section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .hub-section-title { font-size: 1.35rem; }
+
+        .hub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+
+        .game-card {
+            background: linear-gradient(180deg, var(--hub-card) 0%, var(--hub-card-alt) 100%);
+            border-radius: 24px;
+            padding: 16px;
+            color: #0f172a;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .game-thumb {
+            height: 165px;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: end;
+            padding: 16px;
+            color: white;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        .game-thumb::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.02), rgba(15, 23, 42, 0.58));
+        }
+
+        .game-thumb > * { position: relative; z-index: 1; }
+
+        .thumb-blue { background: linear-gradient(135deg, #38bdf8, #2563eb); }
+        .thumb-green { background: linear-gradient(135deg, #4ade80, #16a34a); }
+        .thumb-orange { background: linear-gradient(135deg, #fb923c, #ea580c); }
+        .thumb-purple { background: linear-gradient(135deg, #c084fc, #7c3aed); }
+        .thumb-red { background: linear-gradient(135deg, #fb7185, #e11d48); }
+        .thumb-cyan { background: linear-gradient(135deg, #22d3ee, #0891b2); }
+
+        .game-card-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: start;
+        }
+
+        .rating-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 8px 10px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .game-meta {
+            font-size: 13px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .play-button {
+            width: 100%;
+            border: none;
+            border-radius: 16px;
+            background: #22c55e;
+            color: white;
+            font-size: 15px;
+            font-weight: 800;
+            padding: 14px 16px;
+            cursor: pointer;
+            box-shadow: 0 14px 24px rgba(34, 197, 94, 0.25);
+        }
+
+        .hub-side-stack {
+            display: grid;
+            gap: 18px;
+            align-content: start;
+        }
+
+        .feature-card {
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.12);
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 16px 0 0;
+            padding: 0;
+            display: grid;
+            gap: 12px;
+        }
+
+        .feature-list li {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.04);
+            color: #dbeafe;
+            font-size: 14px;
+        }
+
+        .feature-chip {
+            color: #86efac;
+            font-weight: 800;
+        }
+
+        .hub-disclaimer {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        #game-box { position: fixed; inset: 0; background: #000; z-index: 6000; display: none; }
         iframe { width: 100%; height: 100%; border: none; }
+
+        @media (max-width: 1100px) {
+            .hub-hero,
+            .hub-main { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 720px) {
+            .hub-shell { padding: 18px; }
+            .hub-topbar { flex-direction: column; align-items: stretch; }
+            .hub-actions { justify-content: space-between; }
+            .hub-hero,
+            .hub-main { padding: 18px; }
+            .hub-grid { grid-template-columns: 1fr; }
+            main { padding: 28px; }
+        }
     </style>
 </head>
 <body>
@@ -61,16 +405,153 @@
     </div>
 
     <div id="login-overlay">
-        <h2>CENTRAL_DATA_REPOSITORY</h2>
-        <div class="vault-grid">
-            <div class="vault-item" onclick="launch('astra.html')">> RUN astra.sys</div>
-            <div class="vault-item" onclick="launch('Hollow Knight.html')">> RUN hollow_knight.sys</div>
-            <div class="vault-item" onclick="launch('cl99nightsitf.html')">> RUN 99_nights.sys</div>
-            <div class="vault-item" onclick="launch('clbadicecream2.html')">> RUN ice_cream_v2.sys</div>
-            <div class="vault-item" onclick="launch('clbadicecream3.html')">> RUN ice_cream_v3.sys</div>
-            <div class="vault-item" onclick="launch('clbadtimesimulator.html')">> RUN time_sim_alt.sys</div>
+        <div class="hub-shell">
+            <section class="hub-topbar">
+                <div class="hub-brand">
+                    <div class="hub-logo" aria-hidden="true"></div>
+                    <div>
+                        <h2>Archive Arcade</h2>
+                        <p>A playful game hub with bold cards, social energy, and toy-like polish inspired by modern platform storefronts.</p>
+                    </div>
+                </div>
+                <div class="hub-actions">
+                    <span class="pill live">● 6 experiences online</span>
+                    <span class="pill exit" onclick="panic()">Exit hub</span>
+                </div>
+            </section>
+
+            <section class="hub-hero">
+                <div>
+                    <span class="hub-kicker">Featured drop</span>
+                    <h3>Jump into the secret collection.</h3>
+                    <p>
+                        The hidden gaming vault now opens into a brighter, more playful discovery page with chunky cards,
+                        bold gradients, rounded surfaces, and a familiar social-game energy while remaining original to this archive.
+                    </p>
+                    <div class="hub-cta-row">
+                        <button class="hub-button primary" onclick="launch('Hollow Knight.html')">Play featured experience</button>
+                        <button class="hub-button secondary" onclick="showArticle('home'); panic();">Return to archive</button>
+                    </div>
+                </div>
+                <aside class="hub-preview">
+                    <strong style="font-size: 1.1rem;">Quick picks</strong>
+                    <div class="hub-preview-grid">
+                        <div class="preview-tile blue"><span>Featured</span><span>Hollow Knight</span></div>
+                        <div class="preview-tile green"><span>Co-op</span><span>Bad Ice Cream 3</span></div>
+                        <div class="preview-tile orange"><span>Arcade</span><span>99 Nights</span></div>
+                        <div class="preview-tile purple"><span>Boss Rush</span><span>Time Simulator</span></div>
+                    </div>
+                </aside>
+            </section>
+
+            <section class="hub-main">
+                <div>
+                    <div class="hub-section-head">
+                        <div>
+                            <p class="hub-section-title">Trending experiences</p>
+                            <p class="hub-disclaimer">Styled to evoke a social gaming catalog, but with archive-specific branding and custom layout choices.</p>
+                        </div>
+                        <span class="pill live">Updated instantly</span>
+                    </div>
+
+                    <div class="hub-grid">
+                        <article class="game-card">
+                            <div class="game-thumb thumb-blue"><span>Dreamlike platforming adventure</span></div>
+                            <div class="game-card-top">
+                                <div>
+                                    <h4>Hollow Knight</h4>
+                                    <p class="game-meta"><span>12.4K exploring</span><span>Adventure</span></p>
+                                </div>
+                                <span class="rating-badge">96%</span>
+                            </div>
+                            <button class="play-button" onclick="launch('Hollow Knight.html')">Play now</button>
+                        </article>
+
+                        <article class="game-card">
+                            <div class="game-thumb thumb-orange"><span>Fast arcade survival challenge</span></div>
+                            <div class="game-card-top">
+                                <div>
+                                    <h4>99 Nights in the Forest</h4>
+                                    <p class="game-meta"><span>8.1K active</span><span>Survival</span></p>
+                                </div>
+                                <span class="rating-badge">91%</span>
+                            </div>
+                            <button class="play-button" onclick="launch('cl99nightsitf.html')">Play now</button>
+                        </article>
+
+                        <article class="game-card">
+                            <div class="game-thumb thumb-green"><span>Co-op maze chaos with friends</span></div>
+                            <div class="game-card-top">
+                                <div>
+                                    <h4>Bad Ice Cream 2</h4>
+                                    <p class="game-meta"><span>5.8K chilling</span><span>Co-op</span></p>
+                                </div>
+                                <span class="rating-badge">89%</span>
+                            </div>
+                            <button class="play-button" onclick="launch('clbadicecream2.html')">Play now</button>
+                        </article>
+
+                        <article class="game-card">
+                            <div class="game-thumb thumb-cyan"><span>More levels, more frosty mayhem</span></div>
+                            <div class="game-card-top">
+                                <div>
+                                    <h4>Bad Ice Cream 3</h4>
+                                    <p class="game-meta"><span>6.7K frozen</span><span>Party</span></p>
+                                </div>
+                                <span class="rating-badge">92%</span>
+                            </div>
+                            <button class="play-button" onclick="launch('clbadicecream3.html')">Play now</button>
+                        </article>
+
+                        <article class="game-card">
+                            <div class="game-thumb thumb-purple"><span>Intense dodge-and-learn encounters</span></div>
+                            <div class="game-card-top">
+                                <div>
+                                    <h4>Bad Time Simulator</h4>
+                                    <p class="game-meta"><span>4.2K battling</span><span>Boss Rush</span></p>
+                                </div>
+                                <span class="rating-badge">88%</span>
+                            </div>
+                            <button class="play-button" onclick="launch('clbadtimesimulator.html')">Play now</button>
+                        </article>
+
+                        <article class="game-card">
+                            <div class="game-thumb thumb-red"><span>A remix route for repeat runs</span></div>
+                            <div class="game-card-top">
+                                <div>
+                                    <h4>Forest Encore</h4>
+                                    <p class="game-meta"><span>3.3K revisiting</span><span>Challenge</span></p>
+                                </div>
+                                <span class="rating-badge">87%</span>
+                            </div>
+                            <button class="play-button" onclick="launch('cl99nightsitf.html')">Play now</button>
+                        </article>
+                    </div>
+                </div>
+
+                <aside class="hub-side-stack">
+                    <section class="feature-card">
+                        <h4>Why it feels familiar</h4>
+                        <p>Large thumbnails, rounded cards, strong play buttons, and social stats help echo a mainstream gaming hub without reproducing any exact interface.</p>
+                    </section>
+
+                    <section class="feature-card">
+                        <h4>Hub highlights</h4>
+                        <ul class="feature-list">
+                            <li><span>Playful gradients</span><span class="feature-chip">New</span></li>
+                            <li><span>Featured hero panel</span><span class="feature-chip">Boosted</span></li>
+                            <li><span>Dense game catalog</span><span class="feature-chip">6 live</span></li>
+                            <li><span>Quick exit action</span><span class="feature-chip">Safe</span></li>
+                        </ul>
+                    </section>
+
+                    <section class="feature-card">
+                        <h4>Controls</h4>
+                        <p class="hub-disclaimer">Press the right Shift key at any time to instantly hide the hub or any running game and restore the archive homepage.</p>
+                    </section>
+                </aside>
+            </section>
         </div>
-        <p style="margin-top:30px; font-size:10px; color:#586e75; cursor:pointer;" onclick="panic()">[ DISCONNECT ]</p>
     </div>
 
     <div id="game-box">
@@ -103,13 +584,16 @@
         };
 
         function showArticle(id) {
-            panic(); // Automatically hides games if navigating
-            text.innerHTML = library[id] || library['home'];
+            panic();
+            text.innerHTML = library[id] || library.home;
         }
 
         function triggerSecret() {
             clicks++;
-            if (clicks >= 3) { login.style.display = 'flex'; clicks = 0; }
+            if (clicks >= 3) {
+                login.style.display = 'block';
+                clicks = 0;
+            }
         }
 
         function launch(file) {
@@ -119,30 +603,26 @@
             frame.focus();
         }
 
-        // The Panic Function
         function panic() {
             gameBox.style.display = 'none';
             login.style.display = 'none';
-            frame.src = ""; // Hard reset
-            text.innerHTML = library['home'];
+            frame.src = '';
+            text.innerHTML = library.home;
         }
 
-        // Listen for Right Shift on the main page
         window.addEventListener('keydown', function(e) {
-            if (e.code === "ShiftRight") panic();
+            if (e.code === 'ShiftRight') panic();
         });
 
-        // SPECIAL FIX: Listen for Right Shift inside the Game Frame
         frame.onload = function() {
             try {
                 frame.contentWindow.addEventListener('keydown', function(e) {
-                    if (e.code === "ShiftRight") {
-                        // Call the panic function in the parent window
+                    if (e.code === 'ShiftRight') {
                         window.panic();
                     }
                 });
             } catch (e) {
-                console.log("Cross-origin game detected. Cloak key might be limited.");
+                console.log('Cross-origin game detected. Cloak key might be limited.');
             }
         };
 
