@@ -19,37 +19,45 @@
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 4px solid #2a2721;
         }
-        .about-btn { cursor: pointer; font-weight: bold; text-decoration: underline; color: #dcd0b8; }
-        .about-btn:hover { color: #fff; }
+        .about-btn { cursor: pointer; font-weight: bold; text-decoration: none; color: #dcd0b8; font-size: 14px; }
 
         /* MAIN LAYOUT */
         .wrapper { display: flex; height: calc(100% - 60px); }
         
         /* SIDEBAR NAVIGATION */
-        nav { width: 250px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 20px; overflow-y: auto; }
-        nav h3 { font-size: 14px; text-transform: uppercase; color: #777; margin-bottom: 10px; }
-        nav ul { list-style: none; padding: 0; margin: 0 0 20px 0; }
-        nav li { padding: 8px 0; border-bottom: 1px solid #dcd8cc; font-size: 14px; cursor: pointer; color: #444; }
+        nav { width: 250px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 20px; }
+        nav h3 { font-size: 12px; text-transform: uppercase; color: #777; letter-spacing: 1px; }
+        nav ul { list-style: none; padding: 0; margin-bottom: 25px; }
+        nav li { padding: 8px 0; border-bottom: 1px solid #dcd8cc; font-size: 13px; cursor: pointer; color: #444; }
         nav li:hover { color: #000; text-decoration: underline; }
 
         /* CONTENT AREA */
-        main { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
-        .article { max-width: 700px; line-height: 1.7; color: var(--text); }
-        h1 { font-family: 'Times New Roman', serif; font-size: 32px; margin-top: 0; }
+        main { flex: 1; padding: 40px; overflow-y: auto; position: relative; background: var(--bg); }
+        .article { max-width: 750px; line-height: 1.8; color: var(--text); }
+        h1 { font-family: 'Times New Roman', serif; font-size: 28px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
 
-        /* HUB / LIBRARY OVERLAY */
-        #hub-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 10; display: none; padding: 40px; box-sizing: border-box;
-        }
-        .vault-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 600px; margin-top: 30px; }
-        .vault-card { background: #fff; border: 1px solid var(--border); padding: 20px; cursor: pointer; box-shadow: 2px 2px 5px rgba(0,0,0,0.05); }
-        .vault-card:hover { border-color: #8c7b65; }
+        /* SECRET SIGNATURE */
+        .sig-container { margin-top: 60px; padding-top: 20px; border-top: 1px double #ccc; }
+        #secret-sig { cursor: pointer; font-style: italic; color: #8c7b65; user-select: none; transition: opacity 0.3s; }
+        #secret-sig:hover { opacity: 0.8; }
 
-        /* GAME WINDOW (The Iframe) */
-        #game-container {
+        /* HIDDEN OVERLAY (THE HUB) */
+        #vault-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 1000; display: none;
+            background: rgba(0,0,0,0.95); z-index: 5000; 
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .v-btn { 
+            background: #222; color: #555; border: 1px solid #333; 
+            padding: 20px; margin: 10px; width: 200px; text-align: center;
+            cursor: pointer; font-family: monospace; border-radius: 4px;
+        }
+        .v-btn:hover { color: #fff; border-color: #666; }
+
+        /* GAME FRAME */
+        #game-window {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 6000; display: none;
         }
         iframe { width: 100%; height: 100%; border: none; }
     </style>
@@ -57,110 +65,94 @@
 <body>
 
     <header>
-        <div class="about-btn" onclick="openHub()">[ About Darwin / Archive Root ]</div>
-        <div>Cambridge Library Digital Repository v4.2</div>
+        <div class="about-btn" onclick="showSection('home')">UNIVERSITY ARCHIVE / BIOGRAPHY: DARWIN, C.</div>
+        <div style="font-size: 12px; opacity: 0.6;">Access Level: Public / Guest</div>
     </header>
 
     <div class="wrapper">
         <nav>
-            <h3>Biographical</h3>
+            <h3>Volumes</h3>
             <ul>
-                <li onclick="showSection('early')">Early Life (1809-1825)</li>
-                <li onclick="showSection('edinburgh')">Edinburgh & Cambridge</li>
+                <li onclick="showSection('home')">Introduction</li>
+                <li onclick="showSection('early')">Early Education</li>
                 <li onclick="showSection('beagle')">The Beagle Voyage</li>
-            </ul>
-            <h3>Scientific Theory</h3>
-            <ul>
-                <li onclick="showSection('origin')">On the Origin of Species</li>
-                <li onclick="showSection('selection')">Natural Selection</li>
-                <li onclick="showSection('genetics')">Modern Synthesis</li>
             </ul>
             <h3>Manuscripts</h3>
             <ul>
-                <li>Field Notebooks</li>
-                <li>Geological Letters</li>
-                <li>Botany Sketches</li>
+                <li onclick="showSection('origin')">Origin of Species</li>
+                <li onclick="showSection('descent')">The Descent of Man</li>
             </ul>
         </nav>
 
-        <main id="main-content">
-            <div id="section-content" class="article">
-                <h1>The Life and Legacy of Charles Darwin</h1>
-                <p>Charles Darwin is perhaps the most influential figure in biological history. Born in Shrewsbury, Shropshire, he was the fifth of six children of wealthy society doctor and financier Robert Darwin and Susannah Darwin.</p>
-                <p>In December 1831, he joined the HMS Beagle as a gentleman naturalist. The expedition lasted five years and took him around the world, particularly the coast of South America and the Galápagos Islands. During this time, his observations of flora, fauna, and geology laid the groundwork for his future theories.</p>
-                <p>His most famous work, <i>On the Origin of Species</i>, published in 1859, introduced the scientific theory that populations evolve over the course of generations through a process of natural selection. It was controversial at the time but is now the foundation of all modern biological science.</p>
-                <p>Scroll down for further documentation on his botanical studies and his impact on Victorian society...</p>
-                <div style="height: 1000px; border-left: 2px solid #eee; padding-left: 20px; color: #888;">
-                    [Additional Archive Text For Scannability...]
+        <main>
+            <div id="content-body" class="article">
                 </div>
-            </div>
-
-            <div id="hub-layer">
-                <h1>Archive: System Files</h1>
-                <p>Select a digital module to initialize.</p>
-                <div class="vault-grid">
-                    <div class="vault-card" onclick="launch('astra.html')">
-                        <h3>Module: ASTRA</h3>
-                        <p>Subsystem 1.8.8 - Sandbox Environment</p>
-                    </div>
-                    <div class="vault-card" onclick="launch('Hollow Knight.html')">
-                        <h3>Module: HOLLOW</h3>
-                        <p>Unity Engine Instance</p>
-                    </div>
-                </div>
+            
+            <div class="sig-container">
+                <span id="secret-sig" onclick="handleSigClick()">— Charles Robert Darwin</span>
             </div>
         </main>
     </div>
 
-    <div id="game-container">
+    <div id="vault-overlay">
+        <div class="v-btn" onclick="launch('astra.html')">INIT_ASTRA</div>
+        <div class="v-btn" onclick="launch('Hollow Knight.html')">INIT_HOLLOW</div>
+        <div style="color: #333; margin-top: 20px; cursor:pointer;" onclick="closeVault()">[ CANCEL ]</div>
+    </div>
+
+    <div id="game-window">
         <iframe id="game-frame" src=""></iframe>
     </div>
 
     <script>
-        const hub = document.getElementById('hub-layer');
-        const container = document.getElementById('game-container');
+        const content = document.getElementById('content-body');
+        const vault = document.getElementById('vault-overlay');
+        const gameWin = document.getElementById('game-window');
         const frame = document.getElementById('game-frame');
-        const sectionContent = document.getElementById('section-content');
+        
+        let sigClicks = 0;
 
-        // Navigates back to the Hub (where games are)
-        function openHub() {
-            container.style.display = 'none';
-            frame.src = ""; // Kill audio
-            hub.style.display = 'block';
+        // Article Data
+        const articles = {
+            home: `<h1>Biographical Overview</h1><p>Charles Robert Darwin (12 February 1809 – 19 April 1882) was an English naturalist, geologist and biologist, best known for his contributions to evolutionary biology.</p><p>His journey on the HMS Beagle was the defining moment of his career, providing the data that would eventually lead to the theory of natural selection.</p>`,
+            early: `<h1>Early Education</h1><p>Darwin spent the summer of 1825 as an apprentice doctor, helping his father treat the poor of Shropshire. He then went to the University of Edinburgh Medical School, but found lectures dull and surgery distressing.</p>`,
+            beagle: `<h1>The Voyage of the Beagle</h1><p>The expedition lasted nearly five years. Darwin spent most of that time on land investigating geology and making natural history collections, while the Beagle surveyed and charted coasts.</p>`
+        };
+
+        // Initialize first page
+        function showSection(id) {
+            closeVault();
+            gameWin.style.display = 'none';
+            frame.src = '';
+            content.innerHTML = articles[id] || articles['home'];
+        }
+        showSection('home');
+
+        // Secret Logic
+        function handleSigClick() {
+            sigClicks++;
+            if (sigClicks >= 3) {
+                vault.style.display = 'flex';
+                sigClicks = 0;
+            }
         }
 
-        // Launches game
+        function closeVault() {
+            vault.style.display = 'none';
+        }
+
         function launch(file) {
-            hub.style.display = 'none';
-            container.style.display = 'block';
+            vault.style.display = 'none';
+            gameWin.style.display = 'block';
             frame.src = file;
             frame.focus();
-        }
-
-        // Visual Article Switcher (Adds more "depth" to the site)
-        function showSection(type) {
-            hub.style.display = 'none';
-            container.style.display = 'none';
-            frame.src = "";
-            
-            let html = "";
-            if(type === 'beagle') {
-                html = "<h1>Voyage of the Beagle</h1><p>The voyage of the Beagle was the most important event in my life, and has determined my whole career...</p>";
-            } else if(type === 'origin') {
-                html = "<h1>On the Origin of Species</h1><p>This work was first published on Thursday 24 November 1859 and is considered the foundation of evolutionary biology...</p>";
-            } else {
-                html = "<h1>Archived Records</h1><p>This section contains scanned manuscripts and letters related to " + type + ".</p>";
-            }
-            sectionContent.innerHTML = html;
         }
 
         // RIGHT SHIFT CLOAK
         window.addEventListener('keydown', function(e) {
             if (e.code === "ShiftRight") {
-                // Instantly hide game and show the main research article
-                container.style.display = 'none';
-                hub.style.display = 'none';
-                frame.src = ""; // Kill game and audio
+                // Instantly go back to a boring article and stop all game activity
+                showSection('early'); 
             }
         });
     </script>
