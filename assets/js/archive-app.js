@@ -5,7 +5,20 @@ const frame = document.getElementById('game-frame');
 const panicChip = document.getElementById('panic-chip');
 const gameGrid = document.getElementById('hub-grid');
 const liveCountEls = document.querySelectorAll('[data-live-count]');
+const createAccountForm = document.getElementById('create-account-form');
+const loginForm = document.getElementById('login-form');
+const logoutButton = document.getElementById('logout-button');
+const accountStatus = document.getElementById('account-status');
+const accountStatePill = document.getElementById('account-state-pill');
+const accountSummaryTitle = document.getElementById('account-summary-title');
+const accountSummaryCopy = document.getElementById('account-summary-copy');
+const accountProfileChips = document.getElementById('account-profile-chips');
+const metricLaunchCount = document.getElementById('metric-launch-count');
+const metricArticleCount = document.getElementById('metric-article-count');
+const progressList = document.getElementById('progress-list');
 let clicks = 0;
+
+const store = window.archiveAccountStore;
 
 const library = {
   home: `<h1>The Darwin Collection</h1>
@@ -25,17 +38,117 @@ const library = {
       <p>The resulting framework transformed biology by uniting diverse observations under a single historical process. Although later genetics refined the mechanisms of inheritance, natural selection remains one of the central principles of modern science because it explains both the diversity of life and the fit between organisms and their environments.</p>`
 };
 
+function setStatus(message = '', type = '') {
+  accountStatus.className = 'status-banner';
+  accountStatus.textContent = message;
+  if (message && type) {
+    accountStatus.classList.add(type);
+  }
+}
+
+function formatDate(isoString) {
+  if (!isoString) return 'Not yet';
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return 'Not yet';
+  return date.toLocaleString();
+}
+
+function updateAccountUI() {
+  const account = store.getCurrentAccount();
+
+  if (!account) {
+    accountStatePill.textContent = 'Guest mode';
+    accountSummaryTitle.textContent = 'No player signed in';
+    accountSummaryCopy.textContent = 'Create an account to save your progress, recently played games, and archive exploration history.';
+    accountProfileChips.innerHTML = '<span class="summary-chip">Progress saves to this browser after sign in.</span>';
+    metricLaunchCount.textContent = '0';
+    metricArticleCount.textContent = '0';
+    progressList.innerHTML = '<span class="progress-pill">No account activity yet</span>';
+    return;
+  }
+
+  const { progress, profile } = account;
+  accountStatePill.textContent = `Signed in: ${account.username}`;
+  accountSummaryTitle.textContent = `${account.username}'s archive pass`; 
+  accountSummaryCopy.textContent = `Created ${formatDate(account.createdAt)}. Last article: ${progress.lastArticle}. Last game launch: ${progress.lastPlayed ? formatDate(progress.lastPlayed) : 'Not yet'}.`;
+
+  const chips = [
+    `Favorite: ${profile.favoriteGame || 'Not set'}`,
+    profile.bio || 'Add a bio when creating an account to personalize your save.',
+    `Games tracked: ${progress.gamesPlayed.length}`
+  ];
+  accountProfileChips.innerHTML = chips.map(chip => `<span class="summary-chip">${chip}</span>`).join('');
+
+  metricLaunchCount.textContent = String(progress.launchCount || 0);
+  metricArticleCount.textContent = String(progress.articlesRead.length || 0);
+
+  const activity = [];
+  if (progress.gamesPlayed.length) {
+    const latestGame = progress.gamesPlayed[progress.gamesPlayed.length - 1].replace('.html', '');
+    activity.push(`Latest game: ${latestGame}`);
+  }
+  activity.push(`Articles: ${progress.articlesRead.join(', ')}`);
+  activity.push(`Last played: ${progress.lastPlayed ? formatDate(progress.lastPlayed) : 'Not yet'}`);
+  progressList.innerHTML = activity.map(item => `<span class="progress-pill">${item}</span>`).join('');
+}
+
+function trackArticleProgress(id) {
+  const account = store.getCurrentAccount();
+  if (!account) return;
+
+  store.updateCurrentAccount(current => {
+    const articlesRead = current.progress.articlesRead.includes(id)
+      ? current.progress.articlesRead
+      : current.progress.articlesRead.concat(id);
+    return {
+      ...current,
+      progress: {
+        ...current.progress,
+        articlesRead,
+        lastArticle: id
+      }
+    };
+  });
+
+  updateAccountUI();
+}
+
 function showArticle(id) {
   panic();
   text.innerHTML = library[id] || library.home;
+  trackArticleProgress(id in library ? id : 'home');
 }
 
 function triggerSecret() {
   clicks++;
   if (clicks >= 3) {
     login.style.display = 'block';
+    updateAccountUI();
     clicks = 0;
   }
+}
+
+function trackGameLaunch(file) {
+  const account = store.getCurrentAccount();
+  if (!account) return;
+
+  store.updateCurrentAccount(current => {
+    const gamesPlayed = current.progress.gamesPlayed.includes(file)
+      ? current.progress.gamesPlayed
+      : current.progress.gamesPlayed.concat(file);
+
+    return {
+      ...current,
+      progress: {
+        ...current.progress,
+        gamesPlayed,
+        launchCount: current.progress.launchCount + 1,
+        lastPlayed: new Date().toISOString()
+      }
+    };
+  });
+
+  updateAccountUI();
 }
 
 function launch(file) {
@@ -44,6 +157,7 @@ function launch(file) {
   panicChip.style.display = 'inline-flex';
   frame.src = file;
   frame.focus();
+  trackGameLaunch(file);
 }
 
 function panic() {
@@ -75,6 +189,51 @@ function renderCatalog() {
   `).join('');
 }
 
+createAccountForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  const formData = new FormData(createAccountForm);
+  const result = await store.createAccount({
+    username: formData.get('username'),
+    password: formData.get('password'),
+    favoriteGame: formData.get('favoriteGame'),
+    bio: formData.get('bio')
+  });
+
+  if (!result.ok) {
+    setStatus(result.message, 'error');
+    return;
+  }
+
+  createAccountForm.reset();
+  loginForm.reset();
+  setStatus(`Account created for ${result.account.username}. Progress will now save automatically on this device.`, 'success');
+  updateAccountUI();
+});
+
+loginForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  const formData = new FormData(loginForm);
+  const result = await store.loginAccount({
+    username: formData.get('username'),
+    password: formData.get('password')
+  });
+
+  if (!result.ok) {
+    setStatus(result.message, 'error');
+    return;
+  }
+
+  loginForm.reset();
+  setStatus(`Welcome back, ${result.account.username}. Your saved progress has been restored.`, 'success');
+  updateAccountUI();
+});
+
+logoutButton.addEventListener('click', () => {
+  store.logoutAccount();
+  setStatus('Signed out. Account data remains stored on this browser for the next login.', 'success');
+  updateAccountUI();
+});
+
 window.showArticle = showArticle;
 window.triggerSecret = triggerSecret;
 window.launch = launch;
@@ -97,4 +256,5 @@ frame.onload = function() {
 };
 
 renderCatalog();
-showArticle('home');
+updateAccountUI();
+showArticle(store.getCurrentAccount()?.progress.lastArticle || 'home');

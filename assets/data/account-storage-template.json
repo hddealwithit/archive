@@ -1,0 +1,21 @@
+{
+  "storage": "browser-localStorage",
+  "localStorageKey": "archiveArcadeAccounts",
+  "sessionKey": "archiveArcadeCurrentUser",
+  "accountShape": {
+    "username": "player1",
+    "passwordHash": "sha256-hex-string",
+    "createdAt": "2026-03-19T00:00:00.000Z",
+    "profile": {
+      "favoriteGame": "Hollow Knight",
+      "bio": "Loves secret archive game vaults"
+    },
+    "progress": {
+      "articlesRead": ["home", "voyage"],
+      "gamesPlayed": ["Hollow Knight.html"],
+      "launchCount": 3,
+      "lastPlayed": "2026-03-19T00:00:00.000Z",
+      "lastArticle": "voyage"
+    }
+  }
+}
