@@ -16,6 +16,7 @@
             --hub-accent: #00a2ff;
             --hub-accent-2: #7c3aed;
             --hub-success: #22c55e;
+            --hub-danger: #fb7185;
             --hub-text: #e5eefb;
             --hub-muted: #9fb2d1;
             --hub-shadow: 0 28px 80px rgba(2, 6, 23, 0.45);
@@ -370,6 +371,148 @@
             line-height: 1.6;
         }
 
+        .account-panel {
+            display: grid;
+            grid-template-columns: minmax(280px, 1.1fr) minmax(240px, 0.9fr);
+            gap: 22px;
+            margin-bottom: 22px;
+        }
+
+        .account-card,
+        .progress-card,
+        .save-card {
+            background: rgba(15, 23, 42, 0.52);
+            border-radius: 24px;
+            padding: 22px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+        }
+
+        .account-card h4,
+        .progress-card h4,
+        .save-card h4,
+        .auth-form h5 { margin: 0 0 10px; }
+
+        .account-card p,
+        .progress-card p,
+        .save-card p,
+        .auth-meta,
+        .save-path { color: var(--hub-muted); }
+
+        .auth-forms {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .auth-form {
+            background: rgba(2, 6, 23, 0.42);
+            border-radius: 20px;
+            padding: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.12);
+        }
+
+        .field-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .field-grid.two-col {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .field-label {
+            display: grid;
+            gap: 7px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #dbeafe;
+        }
+
+        .hub-input,
+        .hub-textarea {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(15, 23, 42, 0.9);
+            color: white;
+            padding: 12px 14px;
+            font: inherit;
+        }
+
+        .hub-textarea { min-height: 92px; resize: vertical; }
+
+        .auth-button {
+            width: 100%;
+            margin-top: 14px;
+            border: none;
+            border-radius: 16px;
+            padding: 13px 16px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .auth-button.create { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
+        .auth-button.signin { background: linear-gradient(135deg, var(--hub-accent), #2563eb); color: white; }
+        .auth-button.logout { background: rgba(251, 113, 133, 0.16); color: #fecdd3; border: 1px solid rgba(251, 113, 133, 0.24); }
+
+        .status-banner {
+            margin-top: 16px;
+            border-radius: 16px;
+            padding: 12px 14px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status-banner.success { display: block; background: rgba(34, 197, 94, 0.14); color: #bbf7d0; }
+        .status-banner.error { display: block; background: rgba(251, 113, 133, 0.14); color: #fecdd3; }
+
+        .account-summary {
+            display: grid;
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .summary-chip-row,
+        .progress-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .summary-chip,
+        .progress-pill {
+            border-radius: 999px;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.06);
+            color: #e2e8f0;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .progress-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .metric-box {
+            border-radius: 18px;
+            padding: 16px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .metric-box strong { display: block; font-size: 1.65rem; margin-bottom: 6px; }
+
+        .save-path {
+            margin-top: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+        }
+
         #game-box { position: fixed; inset: 0; background: #000; z-index: 6000; display: none; }
         #panic-chip {
             position: fixed;
@@ -390,7 +533,9 @@
 
         @media (max-width: 1100px) {
             .hub-hero,
-            .hub-main { grid-template-columns: 1fr; }
+            .hub-main,
+            .account-panel,
+            .auth-forms { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 720px) {
@@ -399,7 +544,9 @@
             .hub-actions { justify-content: space-between; }
             .hub-hero,
             .hub-main { padding: 18px; }
-            .hub-grid { grid-template-columns: 1fr; }
+            .hub-grid,
+            .field-grid.two-col,
+            .progress-metrics { grid-template-columns: 1fr; }
             main { padding: 28px; }
             #panic-chip {
                 top: auto;
@@ -474,6 +621,100 @@
                 </aside>
             </section>
 
+            <section class="account-panel">
+                <section class="account-card">
+                    <div style="display:flex; justify-content:space-between; gap:16px; align-items:start; flex-wrap:wrap;">
+                        <div>
+                            <h4>Player accounts & saved progress</h4>
+                            <p>Create a username and password to keep your profile, favorite game, article history, and launch progress saved directly on this device.</p>
+                        </div>
+                        <span class="pill live" id="account-state-pill">Guest mode</span>
+                    </div>
+
+                    <div class="auth-forms">
+                        <form class="auth-form" id="create-account-form">
+                            <h5>Create account</h5>
+                            <p class="auth-meta">Register a new local profile with a favorite game and short bio.</p>
+                            <div class="field-grid two-col">
+                                <label class="field-label">
+                                    Username
+                                    <input class="hub-input" type="text" name="username" maxlength="24" autocomplete="username" required>
+                                </label>
+                                <label class="field-label">
+                                    Password
+                                    <input class="hub-input" type="password" name="password" minlength="4" autocomplete="new-password" required>
+                                </label>
+                            </div>
+                            <div class="field-grid" style="margin-top:12px;">
+                                <label class="field-label">
+                                    Favorite game
+                                    <input class="hub-input" type="text" name="favoriteGame" maxlength="48" placeholder="Hollow Knight">
+                                </label>
+                                <label class="field-label">
+                                    Bio
+                                    <textarea class="hub-textarea" name="bio" maxlength="160" placeholder="What do you like to play in the archive?"></textarea>
+                                </label>
+                            </div>
+                            <button class="auth-button create" type="submit">Create account</button>
+                        </form>
+
+                        <form class="auth-form" id="login-form">
+                            <h5>Sign in</h5>
+                            <p class="auth-meta">Return to your saved account on this browser at any time.</p>
+                            <div class="field-grid">
+                                <label class="field-label">
+                                    Username
+                                    <input class="hub-input" type="text" name="username" maxlength="24" autocomplete="username" required>
+                                </label>
+                                <label class="field-label">
+                                    Password
+                                    <input class="hub-input" type="password" name="password" minlength="4" autocomplete="current-password" required>
+                                </label>
+                            </div>
+                            <button class="auth-button signin" type="submit">Sign in</button>
+                            <button class="auth-button logout" id="logout-button" type="button">Sign out</button>
+                        </form>
+                    </div>
+
+                    <div class="status-banner" id="account-status" aria-live="polite"></div>
+
+                    <div class="account-summary" id="account-summary">
+                        <div>
+                            <strong id="account-summary-title">No player signed in</strong>
+                            <p id="account-summary-copy" class="auth-meta">Create an account to save your progress, recently played games, and archive exploration history.</p>
+                        </div>
+                        <div class="summary-chip-row" id="account-profile-chips"></div>
+                    </div>
+                </section>
+
+                <div style="display:grid; gap:22px;">
+                    <section class="progress-card">
+                        <h4>Progress snapshot</h4>
+                        <p>Each account keeps track of the games you launch and the archive articles you read.</p>
+                        <div class="progress-metrics">
+                            <div class="metric-box">
+                                <strong id="metric-launch-count">0</strong>
+                                <span>Game launches</span>
+                            </div>
+                            <div class="metric-box">
+                                <strong id="metric-article-count">0</strong>
+                                <span>Articles read</span>
+                            </div>
+                        </div>
+                        <div style="margin-top:16px;">
+                            <strong style="display:block; margin-bottom:10px;">Recent activity</strong>
+                            <div class="progress-list" id="progress-list"></div>
+                        </div>
+                    </section>
+
+                    <section class="save-card">
+                        <h4>Storage file</h4>
+                        <p>Account records are saved in your browser storage using the schema documented in the template file below.</p>
+                        <div class="save-path">assets/data/account-storage-template.json</div>
+                    </section>
+                </div>
+            </section>
+
             <section class="hub-main">
                 <div>
                     <div class="hub-section-head">
@@ -533,6 +774,7 @@
     <button id="panic-chip" onclick="panic()" aria-label="Panic key fallback">Right Shift / Exit</button>
 
     <script src="assets/js/hub-data.js"></script>
+    <script src="assets/js/account-store.js"></script>
     <script src="assets/js/archive-app.js"></script>
 </body>
 </html>
