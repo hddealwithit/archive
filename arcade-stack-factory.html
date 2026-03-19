@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stack Factory</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: radial-gradient(circle at top, #a855f7, #020617 58%); font-family: Inter, Arial, sans-serif; color: #f5f3ff; }
+    .shell { width: min(94vw, 760px); padding: 24px; border-radius: 28px; background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(192, 132, 252, 0.24); box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42); display: grid; gap: 16px; }
+    .row { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .chip { padding: 10px 14px; border-radius: 999px; background: rgba(168, 85, 247, 0.15); font-weight: 700; }
+    canvas { width: min(88vw, 420px); height: min(calc(88vw * 1.75), 735px); background: linear-gradient(180deg, #0f172a, #020617); border-radius: 22px; border: 1px solid rgba(192, 132, 252, 0.26); justify-self: center; }
+    .controls { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
+    button { border: 0; border-radius: 16px; padding: 12px 18px; font-weight: 800; color: white; background: linear-gradient(135deg, #c084fc, #9333ea); cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="row"><div><p>Archive Arcade</p><h1>Stack Factory</h1></div><div class="chip">Lines: <span id="lines">0</span></div></div>
+    <canvas id="game" width="420" height="735"></canvas>
+    <div class="controls"><span>Use ← → to move, ↑ to rotate, and ↓ to drop faster.</span><button id="restart">Restart stack</button></div>
+  </div>
+  <script>
+    const canvas = document.getElementById('game'), ctx = canvas.getContext('2d'); const linesEl = document.getElementById('lines');
+    const cols = 10, rows = 18, block = 40; const colors = ['#000', '#38bdf8', '#f472b6', '#facc15', '#4ade80', '#c084fc'];
+    const shapes = [ [[1,1,1],[0,1,0]], [[2,2],[2,2]], [[0,3,3],[3,3,0]], [[4,4,0],[0,4,4]], [[5,5,5,5]] ];
+    let board, piece, dropCounter, lastTime, lines, animation;
+    function reset() { cancelAnimationFrame(animation); board = Array.from({ length: rows }, () => Array(cols).fill(0)); lines = 0; linesEl.textContent = '0'; spawn(); dropCounter = 0; lastTime = 0; animation = requestAnimationFrame(loop); }
+    function spawn() { const shape = structuredClone(shapes[Math.floor(Math.random() * shapes.length)]); piece = { matrix: shape, x: Math.floor(cols / 2) - Math.ceil(shape[0].length / 2), y: 0 }; if (collide()) reset(); }
+    function collide() { return piece.matrix.some((row, y) => row.some((value, x) => value && (board[y + piece.y]?.[x + piece.x] ?? 1))); }
+    function merge() { piece.matrix.forEach((row, y) => row.forEach((value, x) => { if (value) board[y + piece.y][x + piece.x] = value; })); clearLines(); spawn(); }
+    function clearLines() { board = board.filter(row => row.some(cell => !cell)); const cleared = rows - board.length; while (board.length < rows) board.unshift(Array(cols).fill(0)); lines += cleared; linesEl.textContent = String(lines); }
+    function rotate() { const rotated = piece.matrix[0].map((_, index) => piece.matrix.map(row => row[index]).reverse()); const old = piece.matrix; piece.matrix = rotated; if (collide()) piece.matrix = old; }
+    function drop() { piece.y += 1; if (collide()) { piece.y -= 1; merge(); } dropCounter = 0; }
+    function drawCell(x, y, value) { ctx.fillStyle = colors[value]; ctx.fillRect(x * block + 2, y * block + 2, block - 4, block - 4); }
+    function render() { ctx.fillStyle = '#020617'; ctx.fillRect(0, 0, canvas.width, canvas.height); board.forEach((row, y) => row.forEach((value, x) => { ctx.strokeStyle = '#162033'; ctx.strokeRect(x * block, y * block, block, block); if (value) drawCell(x, y, value); })); piece.matrix.forEach((row, y) => row.forEach((value, x) => value && drawCell(piece.x + x, piece.y + y, value))); }
+    function loop(time = 0) { const delta = time - lastTime; lastTime = time; dropCounter += delta; if (dropCounter > 520) drop(); render(); animation = requestAnimationFrame(loop); }
+    document.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') { piece.x -= 1; if (collide()) piece.x += 1; } if (e.key === 'ArrowRight') { piece.x += 1; if (collide()) piece.x -= 1; } if (e.key === 'ArrowUp') rotate(); if (e.key === 'ArrowDown') drop(); });
+    document.getElementById('restart').addEventListener('click', reset); reset();
+  </script>
+</body>
+</html>

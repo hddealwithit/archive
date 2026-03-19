@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meteor Drift</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: radial-gradient(circle at top, #0ea5e9, #020617 60%); font-family: Inter, Arial, sans-serif; color: #e0f2fe; }
+    .shell { width: min(92vw, 920px); padding: 24px; border-radius: 28px; background: rgba(8, 15, 33, 0.9); border: 1px solid rgba(56, 189, 248, 0.28); box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42); display: grid; gap: 18px; }
+    .row, .controls { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .row h1, .row p { margin: 0; }
+    .stats { display: flex; gap: 10px; flex-wrap: wrap; }
+    .chip { padding: 10px 14px; border-radius: 999px; background: rgba(14, 165, 233, 0.15); font-weight: 700; }
+    canvas { width: min(88vw, 860px); height: min(calc(88vw * 0.58), 500px); background: linear-gradient(180deg, #020617, #0f172a); border-radius: 22px; border: 1px solid rgba(56, 189, 248, 0.26); justify-self: center; }
+    button { border: 0; border-radius: 16px; padding: 12px 18px; font-weight: 800; color: white; background: linear-gradient(135deg, #06b6d4, #0284c7); cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="row">
+      <div><p>Archive Arcade</p><h1>Meteor Drift</h1></div>
+      <div class="stats"><div class="chip">Score: <span id="score">0</span></div><div class="chip">Best: <span id="best">0</span></div></div>
+    </div>
+    <canvas id="game" width="860" height="500"></canvas>
+    <div class="controls"><span>Use ← and → to dodge meteors and survive as the field speeds up.</span><button id="restart">Restart run</button></div>
+  </div>
+  <script>
+    const canvas = document.getElementById('game'); const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score'); const bestEl = document.getElementById('best');
+    const bestKey = 'archive-meteor-drift-best'; let best = Number(localStorage.getItem(bestKey) || 0);
+    let ship, meteors, score, speed, frame, leftPressed = false, rightPressed = false, animation;
+    function reset() { ship = { x: canvas.width / 2 - 28, y: canvas.height - 70, w: 56, h: 28, speed: 7 }; meteors = []; score = 0; speed = 3.5; frame = 0; scoreEl.textContent = '0'; bestEl.textContent = best; cancelAnimationFrame(animation); loop(); }
+    function spawnMeteor() { const size = 20 + Math.random() * 34; meteors.push({ x: Math.random() * (canvas.width - size), y: -size, size, vy: speed + Math.random() * 2.4, vx: (Math.random() - 0.5) * 1.2 }); }
+    function collide(a, b) { return a.x < b.x + b.size && a.x + a.w > b.x && a.y < b.y + b.size && a.y + a.h > b.y; }
+    function update() { frame += 1; if (leftPressed) ship.x -= ship.speed; if (rightPressed) ship.x += ship.speed; ship.x = Math.max(18, Math.min(canvas.width - ship.w - 18, ship.x)); if (frame % 24 === 0) spawnMeteor(); speed += 0.0025; meteors.forEach(m => { m.y += m.vy; m.x += m.vx; }); meteors = meteors.filter(m => m.y < canvas.height + m.size); for (const meteor of meteors) { if (collide(ship, meteor)) { best = Math.max(best, score); localStorage.setItem(bestKey, String(best)); bestEl.textContent = best; setTimeout(reset, 700); return false; } } score += 1; scoreEl.textContent = String(score); return true; }
+    function drawShip() { ctx.fillStyle = '#67e8f9'; ctx.beginPath(); ctx.moveTo(ship.x + ship.w / 2, ship.y); ctx.lineTo(ship.x + ship.w, ship.y + ship.h); ctx.lineTo(ship.x, ship.y + ship.h); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#f8fafc'; ctx.fillRect(ship.x + ship.w / 2 - 6, ship.y + 10, 12, 16); }
+    function render() { const bg = ctx.createLinearGradient(0, 0, 0, canvas.height); bg.addColorStop(0, '#020617'); bg.addColorStop(1, '#0f172a'); ctx.fillStyle = bg; ctx.fillRect(0, 0, canvas.width, canvas.height); for (let i = 0; i < 80; i++) { ctx.fillStyle = `rgba(255,255,255,${0.15 + (i % 4) * 0.08})`; ctx.fillRect((i * 97 + frame * 0.8) % canvas.width, (i * 67 + frame * 1.2) % canvas.height, 2, 2); } meteors.forEach(m => { ctx.fillStyle = '#fb923c'; ctx.beginPath(); ctx.arc(m.x + m.size / 2, m.y + m.size / 2, m.size / 2, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#fed7aa'; ctx.stroke(); }); drawShip(); }
+    function loop() { if (!update()) return; render(); animation = requestAnimationFrame(loop); }
+    document.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') leftPressed = true; if (e.key === 'ArrowRight') rightPressed = true; });
+    document.addEventListener('keyup', e => { if (e.key === 'ArrowLeft') leftPressed = false; if (e.key === 'ArrowRight') rightPressed = false; });
+    document.getElementById('restart').addEventListener('click', reset); bestEl.textContent = best; reset();
+  </script>
+</body>
+</html>
