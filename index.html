@@ -275,6 +275,15 @@
 
         .game-thumb > * { position: relative; z-index: 1; }
 
+        .game-thumb img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
         .thumb-blue { background: linear-gradient(135deg, #38bdf8, #2563eb); }
         .thumb-green { background: linear-gradient(135deg, #4ade80, #16a34a); }
         .thumb-orange { background: linear-gradient(135deg, #fb923c, #ea580c); }
@@ -435,7 +444,7 @@
                     </div>
                 </div>
                 <div class="hub-actions">
-                    <span class="pill live">● 9 experiences online</span>
+                    <span class="pill live">● 13 experiences online</span>
                     <span class="pill exit" onclick="panic()">Exit hub</span>
                 </div>
             </section>
@@ -447,7 +456,7 @@
                     <p>
                         The hidden gaming vault now opens into a brighter, more playful discovery page with chunky cards,
                         bold gradients, rounded surfaces, and a familiar social-game energy while remaining original to this archive.
-                        New additions include launcher pages that open larger gaming hubs while keeping a visible panic escape on top.
+                        New additions include fully local arcade, puzzle, and sports picks that open instantly without requiring an extra hub click.
                     </p>
                     <div class="hub-cta-row">
                         <button class="hub-button primary" onclick="launch('Hollow Knight.html')">Play featured experience</button>
@@ -459,8 +468,8 @@
                     <div class="hub-preview-grid">
                         <div class="preview-tile blue"><span>Featured</span><span>Hollow Knight</span></div>
                         <div class="preview-tile green"><span>Co-op</span><span>Bad Ice Cream 3</span></div>
-                        <div class="preview-tile orange"><span>Hub</span><span>JimmyQRG Arcade</span></div>
-                        <div class="preview-tile purple"><span>Hub</span><span>Tomb Hub</span></div>
+                        <div class="preview-tile orange"><span>Arcade</span><span>Solar Breakout</span></div>
+                        <div class="preview-tile purple"><span>Puzzle</span><span>Pixel Pairs</span></div>
                     </div>
                 </aside>
             </section>
@@ -537,51 +546,51 @@
                         </article>
 
                         <article class="game-card">
-                            <div class="game-thumb thumb-red"><span>A remix route for repeat runs</span></div>
+                            <div class="game-thumb"><img src="assets/game-thumbs/neon-snake.svg" alt="Neon Snake game art"><span>Classic arcade survival with instant restarts</span></div>
                             <div class="game-card-top">
                                 <div>
-                                    <h4>Forest Encore</h4>
-                                    <p class="game-meta"><span>3.3K revisiting</span><span>Challenge</span></p>
-                                </div>
-                                <span class="rating-badge">87%</span>
-                            </div>
-                            <button class="play-button" onclick="launch('cl99nightsitf.html')">Play now</button>
-                        </article>
-
-                        <article class="game-card">
-                            <div class="game-thumb thumb-blue"><span>Open the jimmyqrg.github.io collection</span></div>
-                            <div class="game-card-top">
-                                <div>
-                                    <h4>JimmyQRG Game Hub</h4>
-                                    <p class="game-meta"><span>7.1K browsing</span><span>Hub</span></p>
+                                    <h4>Neon Snake</h4>
+                                    <p class="game-meta"><span>3.3K slithering</span><span>Arcade</span></p>
                                 </div>
                                 <span class="rating-badge">90%</span>
                             </div>
-                            <button class="play-button" onclick="launch('hub-jimmyqrg.html')">Open hub</button>
+                            <button class="play-button" onclick="launch('arcade-snake.html')">Play now</button>
                         </article>
 
                         <article class="game-card">
-                            <div class="game-thumb thumb-green"><span>Open the tomb-of-the-mask.bitbucket.io collection</span></div>
+                            <div class="game-thumb"><img src="assets/game-thumbs/solar-breakout.svg" alt="Solar Breakout game art"><span>Brick-smashing runs from the arcade collection</span></div>
                             <div class="game-card-top">
                                 <div>
-                                    <h4>Tomb of the Mask Hub</h4>
-                                    <p class="game-meta"><span>6.2K browsing</span><span>Hub</span></p>
+                                    <h4>Solar Breakout</h4>
+                                    <p class="game-meta"><span>4.7K smashing</span><span>Arcade</span></p>
                                 </div>
                                 <span class="rating-badge">93%</span>
                             </div>
-                            <button class="play-button" onclick="launch('hub-tomb-mask.html')">Open hub</button>
+                            <button class="play-button" onclick="launch('arcade-breakout.html')">Play now</button>
                         </article>
 
                         <article class="game-card">
-                            <div class="game-thumb thumb-orange"><span>External launcher with archive-safe exit overlay</span></div>
+                            <div class="game-thumb"><img src="assets/game-thumbs/pixel-pairs.svg" alt="Pixel Pairs game art"><span>A quick-flip memory board from the puzzle lineup</span></div>
                             <div class="game-card-top">
                                 <div>
-                                    <h4>Arcade Vault Browser</h4>
-                                    <p class="game-meta"><span>2.9K testing</span><span>Tools</span></p>
+                                    <h4>Pixel Pairs</h4>
+                                    <p class="game-meta"><span>2.9K matching</span><span>Puzzle</span></p>
                                 </div>
-                                <span class="rating-badge">86%</span>
+                                <span class="rating-badge">88%</span>
                             </div>
-                            <button class="play-button" onclick="launch('hub-jimmyqrg.html')">Launch browser</button>
+                            <button class="play-button" onclick="launch('arcade-memory.html')">Play now</button>
+                        </article>
+
+                        <article class="game-card">
+                            <div class="game-thumb"><img src="assets/game-thumbs/velocity-pong.svg" alt="Velocity Pong game art"><span>Head-to-head reflex play from the sports shelf</span></div>
+                            <div class="game-card-top">
+                                <div>
+                                    <h4>Velocity Pong</h4>
+                                    <p class="game-meta"><span>3.8K rallying</span><span>Sports</span></p>
+                                </div>
+                                <span class="rating-badge">91%</span>
+                            </div>
+                            <button class="play-button" onclick="launch('arcade-pong.html')">Play now</button>
                         </article>
                     </div>
                 </div>
@@ -597,7 +606,7 @@
                         <ul class="feature-list">
                             <li><span>Playful gradients</span><span class="feature-chip">New</span></li>
                             <li><span>Featured hero panel</span><span class="feature-chip">Boosted</span></li>
-                            <li><span>Dense game catalog</span><span class="feature-chip">9 live</span></li>
+                            <li><span>Dense game catalog</span><span class="feature-chip">13 live</span></li>
                             <li><span>Panic chip overlay</span><span class="feature-chip">Safe</span></li>
                         </ul>
                     </section>
