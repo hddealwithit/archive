@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JimmyQRG Hub Launcher</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #020617; font-family: Inter, Arial, sans-serif; }
+    iframe { width: 100%; height: 100%; border: 0; }
+    .panic-bar {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 20;
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.86);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 999px;
+      padding: 10px 14px;
+      box-shadow: 0 18px 36px rgba(0,0,0,0.4);
+      backdrop-filter: blur(12px);
+      cursor: pointer;
+    }
+    .panic-bar strong { font-size: 13px; }
+    .panic-bar span { font-size: 12px; opacity: 0.82; }
+  </style>
+</head>
+<body>
+  <button class="panic-bar" onclick="window.parent && window.parent.panic ? window.parent.panic() : history.back()">
+    <strong>Right Shift / Exit</strong>
+    <span>Archive panic fallback</span>
+  </button>
+  <iframe src="https://jimmyqrg.github.io/" referrerpolicy="no-referrer"></iframe>
+  <script>
+    window.addEventListener('keydown', function(event) {
+      if (event.code === 'ShiftRight' && window.parent && window.parent.panic) {
+        window.parent.panic();
+      }
+    });
+  </script>
+</body>
+</html>
