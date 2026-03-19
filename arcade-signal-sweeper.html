@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signal Sweeper</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: radial-gradient(circle at top, #22c55e, #020617 58%); font-family: Inter, Arial, sans-serif; color: #ecfccb; }
+    .shell { width: min(94vw, 760px); padding: 24px; border-radius: 28px; background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(74, 222, 128, 0.24); box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42); display: grid; gap: 18px; }
+    .top, .controls { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .chips { display: flex; gap: 10px; flex-wrap: wrap; }
+    .chip { padding: 10px 14px; border-radius: 999px; background: rgba(34, 197, 94, 0.15); font-weight: 700; }
+    .board { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+    .cell { aspect-ratio: 1; border: 0; border-radius: 16px; background: #1e293b; color: #e2e8f0; font: 800 1rem/1 Inter, Arial, sans-serif; cursor: pointer; }
+    .cell.revealed { background: #e2fbe8; color: #0f172a; }
+    .cell.mine { background: #ef4444; color: white; }
+    button { border: 0; border-radius: 16px; padding: 12px 18px; font-weight: 800; color: #052e16; background: linear-gradient(135deg, #bef264, #4ade80); cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="top"><div><p>Archive Arcade</p><h1>Signal Sweeper</h1></div><div class="chips"><div class="chip">Safe tiles: <span id="safe-count">54</span></div><div class="chip">Status: <span id="status">Scanning</span></div></div></div>
+    <div class="board" id="board"></div>
+    <div class="controls"><span>Click a tile to reveal it. Clear every safe signal and avoid the hidden traps.</span><button id="restart">New board</button></div>
+  </div>
+  <script>
+    const size = 8, mineCount = 10; const boardEl = document.getElementById('board'); const safeCountEl = document.getElementById('safe-count'); const statusEl = document.getElementById('status'); let cells = [];
+    function neighbors(index) { const x = index % size, y = Math.floor(index / size), items = []; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { if (!dx && !dy) continue; const nx = x + dx, ny = y + dy; if (nx >= 0 && ny >= 0 && nx < size && ny < size) items.push(ny * size + nx); } return items; }
+    function makeBoard() { cells = Array.from({ length: size * size }, () => ({ mine: false, count: 0, revealed: false })); let planted = 0; while (planted < mineCount) { const idx = Math.floor(Math.random() * cells.length); if (cells[idx].mine) continue; cells[idx].mine = true; planted++; } cells.forEach((cell, index) => { cell.count = neighbors(index).filter(i => cells[i].mine).length; }); statusEl.textContent = 'Scanning'; render(); }
+    function reveal(index) { const cell = cells[index]; if (cell.revealed) return; cell.revealed = true; if (cell.mine) { statusEl.textContent = 'Trap triggered'; revealAll(true); return; } if (cell.count === 0) neighbors(index).forEach(reveal); render(); if (cells.filter(c => !c.mine && !c.revealed).length === 0) { statusEl.textContent = 'Board cleared'; revealAll(false); } }
+    function revealAll(showMines) { cells.forEach(cell => { if (showMines || !cell.mine) cell.revealed = true; }); render(); }
+    function render() { const safeRemaining = cells.filter(cell => !cell.mine && !cell.revealed).length; safeCountEl.textContent = String(safeRemaining); boardEl.innerHTML = ''; cells.forEach((cell, index) => { const button = document.createElement('button'); button.className = 'cell'; if (cell.revealed) button.classList.add('revealed'); if (cell.revealed && cell.mine) { button.classList.add('mine'); button.textContent = '✕'; } else if (cell.revealed && cell.count) button.textContent = cell.count; button.addEventListener('click', () => reveal(index)); boardEl.appendChild(button); }); }
+    document.getElementById('restart').addEventListener('click', makeBoard); makeBoard();
+  </script>
+</body>
+</html>
