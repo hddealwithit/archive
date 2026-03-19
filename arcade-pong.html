@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velocity Pong</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: radial-gradient(circle at top, #f97316, #431407 62%); font-family: Inter, Arial, sans-serif; color: #fff7ed; }
+    .shell { width: min(92vw, 900px); padding: 24px; border-radius: 28px; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(249, 115, 22, 0.3); display: grid; gap: 16px; }
+    .row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .row h1, .row p { margin: 0; }
+    .chip { background: rgba(249, 115, 22, 0.18); border-radius: 999px; padding: 10px 14px; font-weight: 800; }
+    canvas { width: min(88vw, 820px); height: min(calc(88vw * 0.58), 480px); background: #020617; border-radius: 22px; border: 1px solid rgba(249,115,22,0.35); justify-self: center; }
+    button { border: 0; border-radius: 16px; padding: 12px 18px; font-weight: 800; cursor: pointer; color: white; background: linear-gradient(135deg, #fb923c, #ea580c); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="row"><div><p>Sports Hub</p><h1>Velocity Pong</h1></div><div class="chip">First to 7 wins — W/S to move</div></div>
+    <canvas id="game" width="820" height="480"></canvas>
+    <button id="restart">Reset duel</button>
+  </div>
+  <script>
+    const canvas = document.getElementById('game'); const ctx = canvas.getContext('2d');
+    let leftY = 190, rightY = 190, ball, scoreLeft, scoreRight, up = false, down = false;
+    function resetBall(dir = Math.random() > 0.5 ? 1 : -1) { ball = { x: 410, y: 240, dx: 4 * dir, dy: (Math.random() * 4) - 2, r: 10 }; }
+    function reset() { leftY = 190; rightY = 190; scoreLeft = 0; scoreRight = 0; resetBall(); }
+    function step() {
+      if (up) leftY -= 7; if (down) leftY += 7; leftY = Math.max(0, Math.min(canvas.height - 100, leftY));
+      rightY += Math.sign(ball.y - (rightY + 50)) * 4; rightY = Math.max(0, Math.min(canvas.height - 100, rightY));
+      ball.x += ball.dx; ball.y += ball.dy;
+      if (ball.y < ball.r || ball.y > canvas.height - ball.r) ball.dy *= -1;
+      const hitLeft = ball.x - ball.r < 36 && ball.y > leftY && ball.y < leftY + 100;
+      const hitRight = ball.x + ball.r > canvas.width - 36 && ball.y > rightY && ball.y < rightY + 100;
+      if (hitLeft || hitRight) ball.dx *= -1.05;
+      if (ball.x < -20) { scoreRight += 1; resetBall(1); }
+      if (ball.x > canvas.width + 20) { scoreLeft += 1; resetBall(-1); }
+      if (scoreLeft >= 7 || scoreRight >= 7) reset();
+    }
+    function draw() {
+      ctx.fillStyle = '#020617'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.setLineDash([10, 16]); ctx.beginPath(); ctx.moveTo(canvas.width/2, 0); ctx.lineTo(canvas.width/2, canvas.height); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = '#fb923c'; ctx.fillRect(20, leftY, 16, 100); ctx.fillRect(canvas.width - 36, rightY, 16, 100);
+      ctx.beginPath(); ctx.fillStyle = '#fed7aa'; ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fill();
+      ctx.font = '700 48px Inter, Arial'; ctx.fillStyle = '#fff'; ctx.fillText(scoreLeft, 310, 70); ctx.fillText(scoreRight, 470, 70);
+    }
+    function loop() { step(); draw(); requestAnimationFrame(loop); }
+    document.addEventListener('keydown', e => { if (e.key.toLowerCase() === 'w') up = true; if (e.key.toLowerCase() === 's') down = true; });
+    document.addEventListener('keyup', e => { if (e.key.toLowerCase() === 'w') up = false; if (e.key.toLowerCase() === 's') down = false; });
+    document.getElementById('restart').addEventListener('click', reset);
+    reset(); loop();
+  </script>
+</body>
+</html>

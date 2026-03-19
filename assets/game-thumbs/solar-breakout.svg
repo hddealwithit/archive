@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#a855f7"/><stop offset="1" stop-color="#312e81"/></linearGradient></defs>
+  <rect width="640" height="360" rx="32" fill="url(#bg)"/>
+  <rect x="88" y="62" width="464" height="236" rx="30" fill="#020617" opacity=".82"/>
+  <g>
+    <rect x="132" y="96" width="52" height="18" rx="8" fill="#f472b6"/><rect x="192" y="96" width="52" height="18" rx="8" fill="#fb7185"/><rect x="252" y="96" width="52" height="18" rx="8" fill="#fb923c"/><rect x="312" y="96" width="52" height="18" rx="8" fill="#facc15"/><rect x="372" y="96" width="52" height="18" rx="8" fill="#4ade80"/><rect x="432" y="96" width="52" height="18" rx="8" fill="#38bdf8"/>
+  </g>
+  <rect x="250" y="244" width="140" height="16" rx="8" fill="#c084fc"/>
+  <circle cx="320" cy="200" r="14" fill="#fde68a"/>
+  <text x="64" y="322" fill="white" font-family="Arial, sans-serif" font-size="42" font-weight="700">Solar Breakout</text>
+</svg>

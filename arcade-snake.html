@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Snake</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top, #1d4ed8, #020617 62%);
+      font-family: Inter, Arial, sans-serif;
+      color: #e2e8f0;
+    }
+    .shell {
+      width: min(92vw, 860px);
+      display: grid;
+      gap: 18px;
+      padding: 24px;
+      border-radius: 28px;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      box-shadow: 0 22px 70px rgba(15, 23, 42, 0.45);
+    }
+    .topbar { display: flex; justify-content: space-between; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .title h1, .title p { margin: 0; }
+    .title p { color: #93c5fd; }
+    .stats { display: flex; gap: 12px; flex-wrap: wrap; }
+    .chip { padding: 10px 14px; border-radius: 999px; background: rgba(59, 130, 246, 0.16); font-weight: 700; }
+    canvas { width: min(88vw, 520px); height: min(88vw, 520px); background: #020617; border-radius: 22px; border: 1px solid rgba(59,130,246,0.32); justify-self: center; }
+    .controls { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
+    button { border: 0; border-radius: 16px; padding: 12px 18px; font-weight: 800; cursor: pointer; color: white; background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .hint { color: #cbd5e1; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="title">
+        <p>Arcade Hub</p>
+        <h1>Neon Snake</h1>
+      </div>
+      <div class="stats">
+        <div class="chip">Score: <span id="score">0</span></div>
+        <div class="chip">Best: <span id="best">0</span></div>
+      </div>
+    </div>
+    <canvas id="board" width="520" height="520" aria-label="Neon Snake game board"></canvas>
+    <div class="controls">
+      <span class="hint">Arrow keys move. Collect the glowing nodes and avoid walls or yourself.</span>
+      <button id="restart">Restart run</button>
+    </div>
+  </div>
+  <script>
+    const tileCount = 20;
+    const size = 26;
+    const canvas = document.getElementById('board');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+    const bestEl = document.getElementById('best');
+    const bestKey = 'archive-neon-snake-best';
+    let best = Number(localStorage.getItem(bestKey) || 0);
+    let snake, direction, nextDirection, food, score, loop;
+
+    function reset() {
+      snake = [{ x: 10, y: 10 }];
+      direction = { x: 1, y: 0 };
+      nextDirection = { x: 1, y: 0 };
+      score = 0;
+      placeFood();
+      scoreEl.textContent = score;
+      bestEl.textContent = best;
+      clearInterval(loop);
+      loop = setInterval(tick, 110);
+      draw();
+    }
+
+    function placeFood() {
+      do {
+        food = { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
+      } while (snake.some(segment => segment.x === food.x && segment.y === food.y));
+    }
+
+    function tick() {
+      direction = nextDirection;
+      const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+      if (head.x < 0 || head.y < 0 || head.x >= tileCount || head.y >= tileCount || snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+        best = Math.max(best, score);
+        localStorage.setItem(bestKey, String(best));
+        bestEl.textContent = best;
+        clearInterval(loop);
+        setTimeout(reset, 900);
+        return;
+      }
+      snake.unshift(head);
+      if (head.x === food.x && head.y === food.y) {
+        score += 10;
+        scoreEl.textContent = score;
+        placeFood();
+      } else {
+        snake.pop();
+      }
+      draw();
+    }
+
+    function drawCell(x, y, fill, glow = fill) {
+      const px = x * size;
+      const py = y * size;
+      ctx.fillStyle = fill;
+      ctx.shadowColor = glow;
+      ctx.shadowBlur = 18;
+      ctx.fillRect(px + 2, py + 2, size - 4, size - 4);
+      ctx.shadowBlur = 0;
+    }
+
+    function draw() {
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < tileCount; i++) {
+        for (let j = 0; j < tileCount; j++) {
+          ctx.fillStyle = (i + j) % 2 === 0 ? '#071126' : '#0b1730';
+          ctx.fillRect(i * size, j * size, size, size);
+        }
+      }
+      drawCell(food.x, food.y, '#f97316', '#fdba74');
+      snake.forEach((segment, index) => drawCell(segment.x, segment.y, index === 0 ? '#22d3ee' : '#38bdf8', '#67e8f9'));
+    }
+
+    document.addEventListener('keydown', (event) => {
+      const dirs = {
+        ArrowUp: { x: 0, y: -1 }, ArrowDown: { x: 0, y: 1 }, ArrowLeft: { x: -1, y: 0 }, ArrowRight: { x: 1, y: 0 }
+      };
+      const chosen = dirs[event.key];
+      if (!chosen) return;
+      if (chosen.x === -direction.x && chosen.y === -direction.y) return;
+      nextDirection = chosen;
+    });
+
+    document.getElementById('restart').addEventListener('click', reset);
+    bestEl.textContent = best;
+    reset();
+  </script>
+</body>
+</html>
